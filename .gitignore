@@ -1,0 +1,21 @@
+# python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# virtual environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+.env.*
+
+# terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+crash.log
+
+
