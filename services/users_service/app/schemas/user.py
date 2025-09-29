@@ -7,6 +7,10 @@ class UserBase(BaseModel):
     """Base user schema"""
     name: str
     email: EmailStr
+    phone_number: Optional[str] = None
+    image_url: Optional[str] = None
+    address: Optional[str] = None
+
 
 
 class UserCreate(UserBase):

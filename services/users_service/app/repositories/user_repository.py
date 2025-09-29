@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.models.user import User
+from app.schemas.user import UserCreate
 
 
 class UserRepository:
@@ -22,20 +23,17 @@ class UserRepository:
         """Get a list of users with pagination"""
         return self.db.query(User).offset(skip).limit(limit).all()
     
-    def create(self, name: str, email: str, password: str, address: Optional[str] = None) -> User:
+    def create(self, user_data: UserCreate) -> User:
         """Create a new user"""
-        user = User(
-            name=name,
-            email=email,
-            hashed_password=User.hash_password(password),
-            address=address
-        )
-        
+        # Extract data from user_data but exclude password
+        user_dict = user_data.model_dump(exclude={"password"})
+        user = User(**user_dict)
+        # Set the hashed password separately
+        user.hashed_password = User.hash_password(user_data.password)
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
         return user
-    
     def update(self, user_id: int, **kwargs) -> Optional[User]:
         """Update user attributes"""
         user = self.get_by_id(user_id)

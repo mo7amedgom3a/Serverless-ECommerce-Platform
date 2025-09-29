@@ -31,12 +31,7 @@ class UserService:
     
     def create_user(self, user_data: UserCreate) -> UserResponse:
         """Create a new user"""
-        user = self.repository.create(
-            name=user_data.name,
-            email=user_data.email,
-            password=user_data.password,
-            address=user_data.address
-        )
+        user = self.repository.create(user_data)
         return UserResponse.model_validate(user)
     
     def update_user(self, user_id: int, user_data: UserUpdate) -> Optional[UserResponse]:

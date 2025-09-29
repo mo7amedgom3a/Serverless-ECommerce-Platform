@@ -7,75 +7,71 @@ from botocore.exceptions import ClientError
 logger = logging.getLogger(__name__)
 
 class Settings:
-    """Application settings loaded from environment variables and Secrets Manager"""
-    
-    # AWS Region
-    AWS_REGION: str = os.environ.get("AWS_REGION", "us-east-1")
-    
-    # Secret Manager
-    SECRETS_MANAGER_SECRET_ARN: str = os.environ.get("SECRETS_MANAGER_SECRET_ARN", "")
-    
-    # Database credentials (will be overridden by Secrets Manager if available)
-    DB_HOST: str = os.environ.get("DB_HOST", "localhost")
-    DB_PORT: str = os.environ.get("DB_PORT", "5432")
-    DB_NAME: str = os.environ.get("DB_NAME", "ecommerce")
-    DB_USER: str = os.environ.get("DB_USER", "postgres")
-    DB_PASSWORD: str = os.environ.get("DB_PASSWORD", "postgres")
-    
-    # RDS Proxy
-    RDS_PROXY_ENDPOINT: str = os.environ.get("RDS_PROXY_ENDPOINT", "")
-    
+    """Application settings loaded from environment variables"""
+    ENVIRONMENT: str = os.environ.get("ENVIRONMENT", "dev")
+    LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
+    API_PREFIX: str = "/api/v1"
+
     def __init__(self):
-        """Initialize settings and load secrets if available"""
-        if self.SECRETS_MANAGER_SECRET_ARN:
-            self._load_secrets()
-    
-    def _load_secrets(self):
-        """Load secrets from AWS Secrets Manager"""
+        if self.ENVIRONMENT == "dev":
+            self.load_local_env_variables()
+        else:
+            self.load_prod_env_variables()
+
+    def load_local_env_variables(self):
+        self.DB_HOST = os.environ.get("DB_HOST", "localhost")
+        self.DB_PORT = os.environ.get("DB_PORT", "3306")
+        self.DB_NAME = os.environ.get("DB_NAME", "ecommerce")
+        self.DB_USER = os.environ.get("DB_USER", "root")
+        self.DB_PASSWORD = os.environ.get("DB_PASSWORD", "2003")
+
+    def load_prod_env_variables(self):
+        # load from secrets manager
         try:
-            # Create a Secrets Manager client
-            session = boto3.session.Session()
-            client = session.client(
-                service_name='secretsmanager',
-                region_name=self.AWS_REGION
-            )
+            # First try to get from environment variables
+            self.DB_HOST = os.environ.get("DB_HOST")
+            self.DB_PORT = os.environ.get("DB_PORT")
+            self.DB_NAME = os.environ.get("DB_NAME")
+            self.DB_USER = os.environ.get("DB_USER")
+            self.DB_PASSWORD = os.environ.get("DB_PASSWORD")
             
-            # Get the secret value
-            get_secret_value_response = client.get_secret_value(
-                SecretId=self.SECRETS_MANAGER_SECRET_ID
-            )
-            
-            # Parse the secret string
-            secret_string = get_secret_value_response['SecretString']
-            secret = json.loads(secret_string)
-            
-            # Update settings with values from Secrets Manager
-            self.DB_USER = secret.get('username', self.DB_USER)
-            self.DB_PASSWORD = secret.get('password', self.DB_PASSWORD)
-            self.DB_HOST = secret.get('host', self.DB_HOST)
-            self.DB_PORT = secret.get('port', self.DB_PORT)
-            self.DB_NAME = secret.get('dbname', self.DB_NAME)
-            self.RDS_PROXY_ENDPOINT = secret.get('rds_proxy_endpoint', self.RDS_PROXY_ENDPOINT)
-            
-            logger.info("Successfully loaded database credentials from Secrets Manager")
+            # If any of the required database settings are missing, fetch from Secrets Manager
+            if not all([self.DB_HOST, self.DB_PORT, self.DB_NAME, self.DB_USER, self.DB_PASSWORD]):
+                logger.info("Some database settings not found in environment variables, fetching from Secrets Manager")
+                
+                # Create a Secrets Manager client
+                session = boto3.session.Session()
+                client = session.client(service_name='secretsmanager')
+                
+                # Get the secret value
+                secret_name = f"{self.ENVIRONMENT}/rds/credentials"
+                response = client.get_secret_value(SecretId=secret_name)
+                
+                # Parse the secret JSON
+                secret = json.loads(response['SecretString'])
+                
+                # Set database connection parameters from secrets
+                self.DB_HOST = secret.get('host', 'localhost')
+                self.DB_PORT = str(secret.get('port', '3306'))
+                self.DB_NAME = secret.get('dbname', 'ecommerce')
+                self.DB_USER = secret.get('username', 'admin')
+                self.DB_PASSWORD = secret.get('password', '')
+                
+                logger.info(f"Successfully loaded database configuration from Secrets Manager for {self.ENVIRONMENT} environment")
+            else:
+                logger.info("Using database configuration from environment variables")
+                
         except ClientError as e:
-            logger.error(f"Failed to load secrets: {e}")
-            # Continue with environment variables
-    
+            logger.error(f"Failed to retrieve secret from Secrets Manager: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error loading production environment variables: {e}")
+            raise
+        
     @property
     def database_url(self) -> str:
-        """Construct database URL"""
-        if self.RDS_PROXY_ENDPOINT:
-            return f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.RDS_PROXY_ENDPOINT}/{self.DB_NAME}"
-        return f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-    
-    # API Configuration
-    API_PREFIX: str = "/api/v1"
-    DEBUG: bool = os.environ.get("DEBUG", "False").lower() == "true"
-    
-    # Logging
-    LOG_LEVEL: str = os.environ.get("LOG_LEVEL", "INFO")
-
+        """Construct database URL for MySQL"""
+        return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 # Create a global settings object
 settings = Settings()

@@ -13,6 +13,8 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
+    phone_number = Column(String(100), nullable=False)
+    image_url = Column(String(255), nullable=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
     hashed_password = Column(Text, nullable=False)
     address = Column(Text, nullable=True)
