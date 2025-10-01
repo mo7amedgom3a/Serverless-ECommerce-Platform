@@ -6,7 +6,7 @@ provider "aws" {
 resource "aws_secretsmanager_secret" "rds_credentials" {
   name        = "${var.environment}/rds/credentials"
   description = "RDS credentials for ${var.environment} environment"
-  
+  recovery_window_in_days = 0  # Set to 0 to immediately delete the secret after deletion
   tags = {
     Name        = "${var.environment}-rds-credentials"
     Environment = var.environment

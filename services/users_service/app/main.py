@@ -1,5 +1,6 @@
 import logging
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from app.config import settings
 from app.models.base import init_db
@@ -20,15 +21,12 @@ app = FastAPI(
 )
 
 # Include routers
-app.include_router(health.router, prefix="/api/v1")
-app.include_router(users.router, prefix="/api/v1/users")
+app.include_router(health.router)
+app.include_router(users.router)
 
 # Root endpoint
 @app.get("/")
 def root():
-    """Root endpoint"""
-    message = {
-        "message": "Users Service is running"
-    }
-    return json.dumps(message)
+    """Redirect root to /users"""
+    return RedirectResponse(url="/users")
 

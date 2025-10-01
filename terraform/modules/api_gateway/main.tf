@@ -1,85 +1,157 @@
 provider "aws" {
   region = var.aws_region
 }
+resource "aws_api_gateway_rest_api" "api" {
+  name = "${var.environment}-api"
+  description = "API Gateway for ${var.environment} environment"
+}
 
-# HTTP API Gateway
-resource "aws_apigatewayv2_api" "api" {
-  name          = "${var.environment}-ecommerce-api"
-  protocol_type = "HTTP"
+# Root ANY method to forward / to users Lambda
+resource "aws_api_gateway_method" "root_any" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_rest_api.api.root_resource_id
+  http_method = "ANY"
+  authorization = "NONE"
+}
 
-  cors_configuration {
-    allow_origins = var.cors_allowed_origins
-    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
-    allow_headers = ["Content-Type", "Authorization", "X-Amz-Date", "X-Api-Key", "X-Amz-Security-Token", "Idempotency-Key"]
-    max_age       = 300
+resource "aws_api_gateway_integration" "root_any_integration" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_rest_api.api.root_resource_id
+  http_method = aws_api_gateway_method.root_any.http_method
+  type = "AWS_PROXY"
+  uri = var.users_lambda_invoke_arn
+  integration_http_method = "POST"
+}
+
+# user api resource
+resource "aws_api_gateway_resource" "user_api" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id = aws_api_gateway_rest_api.api.root_resource_id
+  path_part = "users"
+}
+
+# /users/{proxy+}
+resource "aws_api_gateway_resource" "user_api_proxy" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id = aws_api_gateway_resource.user_api.id
+  path_part = "{proxy+}"
+}
+
+# Proxy resource method and integration
+resource "aws_api_gateway_method" "user_api_proxy_any" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.user_api_proxy.id
+  http_method = "ANY"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "user_api_proxy_any_integration" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.user_api_proxy.id
+  http_method = aws_api_gateway_method.user_api_proxy_any.http_method
+  type = "AWS_PROXY"
+  uri = var.users_lambda_invoke_arn
+  integration_http_method = "POST"
+}
+
+# Root /users ANY method
+resource "aws_api_gateway_method" "user_api_root_any" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.user_api.id
+  http_method = "ANY"
+  authorization = "NONE"
+}
+resource "aws_api_gateway_integration" "user_api_root_any_integration" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.user_api.id
+  http_method = aws_api_gateway_method.user_api_root_any.http_method
+  type = "AWS_PROXY"
+  uri = var.users_lambda_invoke_arn
+  integration_http_method = "POST"
+}
+
+# users options method
+resource "aws_api_gateway_method" "user_api_options" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.user_api.id
+  http_method = "OPTIONS"
+  authorization = "NONE"
+}
+resource "aws_api_gateway_integration" "user_api_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.user_api.id
+  http_method = aws_api_gateway_method.user_api_options.http_method
+  type = "MOCK"
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
   }
-
-  tags = {
-    Name        = "${var.environment}-ecommerce-api"
-    Environment = var.environment
+}
+resource "aws_api_gateway_method_response"  "user_api_options_response" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.user_api.id
+  http_method = aws_api_gateway_method.user_api_options.http_method
+  status_code = "200"
+  response_models = {
+    "application/json" = "Empty"
+  }
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
   }
 }
 
-# API Gateway stage
-resource "aws_apigatewayv2_stage" "default" {
-  api_id      = aws_apigatewayv2_api.api.id
-  name        = "$default"
-  auto_deploy = true
-
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_logs.arn
-    format = jsonencode({
-      requestId      = "$context.requestId"
-      ip             = "$context.identity.sourceIp"
-      requestTime    = "$context.requestTime"
-      httpMethod     = "$context.httpMethod"
-      path           = "$context.path"
-      routeKey       = "$context.routeKey"
-      status         = "$context.status"
-      protocol       = "$context.protocol"
-      responseLength = "$context.responseLength"
-      integrationLatency = "$context.integrationLatency"
-    })
-  }
-
-  tags = {
-    Name        = "${var.environment}-ecommerce-api-default-stage"
-    Environment = var.environment
+resource "aws_api_gateway_integration_response" "user_api_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.user_api.id
+  http_method = aws_api_gateway_method.user_api_options.http_method
+  status_code = aws_api_gateway_method_response.user_api_options_response.status_code
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+    "method.response.header.Access-Control-Allow-Headers" = "'*'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
   }
 }
 
-# CloudWatch log group for API Gateway
-resource "aws_cloudwatch_log_group" "api_logs" {
-  name              = "/aws/apigateway/${var.environment}-ecommerce-api"
-  retention_in_days = 14
-
-  tags = {
-    Name        = "${var.environment}-api-gateway-logs"
-    Environment = var.environment
-  }
-}
-
-# Lambda integration for users service
-resource "aws_apigatewayv2_integration" "users_lambda_integration" {
-  api_id                 = aws_apigatewayv2_api.api.id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = var.users_lambda_invoke_arn
-  payload_format_version = "2.0"
-  integration_method     = "POST"
-}
-
-# Route for users service
-resource "aws_apigatewayv2_route" "users_route" {
-  api_id    = aws_apigatewayv2_api.api.id
-  route_key = "ANY /users/{proxy+}"
-  target    = "integrations/${aws_apigatewayv2_integration.users_lambda_integration.id}"
-}
-
-# Permission for API Gateway to invoke Lambda
-resource "aws_lambda_permission" "users_lambda_permission" {
+# Lambda permission for API Gateway to invoke Lambda function
+resource "aws_lambda_permission" "user_api_lambda_permission" {
+  function_name = var.users_lambda_function_name
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = var.users_lambda_function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/*/users/*"
+  source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
+}
+
+resource "aws_api_gateway_deployment" "api" {
+    depends_on = [
+      aws_api_gateway_integration.root_any_integration,
+      aws_api_gateway_integration.user_api_root_any_integration,
+      aws_api_gateway_integration.user_api_options_integration,
+      aws_api_gateway_integration.user_api_proxy_any_integration,
+    ]
+
+    triggers = {
+      redeployment = sha1(jsonencode([
+        aws_api_gateway_rest_api.api.body,
+        aws_api_gateway_integration.root_any_integration.uri,
+        aws_api_gateway_integration.user_api_root_any_integration.uri,
+        aws_api_gateway_integration.user_api_options_integration.uri,
+        aws_api_gateway_integration.user_api_proxy_any_integration.uri,
+      ]))
+    }
+    lifecycle {
+      create_before_destroy = true
+    }
+    rest_api_id = aws_api_gateway_rest_api.api.id
+  
+}
+
+
+resource "aws_api_gateway_stage" "main" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  stage_name = var.environment
+  deployment_id = aws_api_gateway_deployment.api.id
+  tags = {
+    Name = "${var.environment}-api-stage"
+  }
 }

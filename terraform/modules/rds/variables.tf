@@ -74,3 +74,9 @@ variable "create_proxy" {
   type        = bool
   default     = false
 }
+
+variable "secrets_manager_secret_arn" {
+  description = "ARN of the Secrets Manager secret for RDS credentials"
+  type        = string
+  default     = ""
+}

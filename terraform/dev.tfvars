@@ -21,7 +21,7 @@ multi_az           = false
 create_rds_proxy   = true
 
 # Lambda
-users_ecr_image_uri = "" # Replace with your ECR image URI
+users_ecr_image_uri = "058264170818.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
 lambda_timeout      = 30
 lambda_memory_size  = 512
 users_lambda_env_vars = {

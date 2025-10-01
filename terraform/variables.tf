@@ -108,7 +108,7 @@ variable "create_rds_proxy" {
 variable "users_ecr_image_uri" {
   description = "URI of the Docker image in ECR for users service"
   type        = string
-  default     = ""
+  default     = "058264170818.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
 }
 
 variable "lambda_timeout" {

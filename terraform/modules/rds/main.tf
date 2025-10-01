@@ -87,7 +87,7 @@ resource "aws_db_proxy" "rds_proxy" {
   auth {
     auth_scheme = "SECRETS"
     iam_auth    = "DISABLED"
-    secret_arn  = aws_secretsmanager_secret.rds_proxy_secret[0].arn
+    secret_arn  = var.secrets_manager_secret_arn
   }
 
   tags = {
@@ -118,27 +118,6 @@ resource "aws_db_proxy_target" "rds_proxy_target" {
   target_group_name      = aws_db_proxy_default_target_group.rds_proxy_target_group[0].name
 }
 
-# Secret for RDS Proxy
-resource "aws_secretsmanager_secret" "rds_proxy_secret" {
-  count       = var.create_proxy ? 1 : 0
-  name        = "${var.environment}/rds-proxy/credentials"
-  description = "RDS Proxy credentials for ${var.environment} environment"
-  
-  tags = {
-    Name        = "${var.environment}-rds-proxy-credentials"
-    Environment = var.environment
-  }
-}
-
-# Secret Version for RDS Proxy
-resource "aws_secretsmanager_secret_version" "rds_proxy_secret_version" {
-  count         = var.create_proxy ? 1 : 0
-  secret_id     = aws_secretsmanager_secret.rds_proxy_secret[0].id
-  secret_string = jsonencode({
-    username = var.db_username
-    password = local.db_password
-  })
-}
 
 # IAM Role for RDS Proxy
 resource "aws_iam_role" "rds_proxy_role" {
@@ -178,7 +157,7 @@ resource "aws_iam_policy" "rds_proxy_policy" {
           "secretsmanager:GetSecretValue"
         ]
         Effect   = "Allow"
-        Resource = aws_secretsmanager_secret.rds_proxy_secret[0].arn
+        Resource = var.secrets_manager_secret_arn
       }
     ]
   })

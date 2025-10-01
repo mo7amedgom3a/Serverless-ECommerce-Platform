@@ -149,18 +149,18 @@ resource "aws_security_group" "rds_sg" {
   description = "Security group for RDS"
   vpc_id      = aws_vpc.main.id
 
-  # Allow PostgreSQL traffic from EC2 security group
+  # Allow mysql traffic from EC2 security group
   ingress {
-    from_port       = 5432
-    to_port         = 5432
+    from_port       = 3306
+    to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.ec2_rds_sg.id]
   }
 
-  # Allow PostgreSQL traffic from Lambda security group
+  # Allow MySQL traffic from Lambda security group
   ingress {
-    from_port       = 5432
-    to_port         = 5432
+    from_port       = 3306
+    to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.lambda_rds_sg.id]
   }
