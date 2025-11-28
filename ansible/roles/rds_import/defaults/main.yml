@@ -1,0 +1,11 @@
+---
+# Default variables for rds_import role
+
+sql_dump_local_path: "../scripts/ecommerce_dump.sql"
+sql_dump_remote_path: "/tmp/ecommerce_dump.sql"
+cleanup_dump_after_import: true
+rds_host: "localhost"
+rds_port: 3306
+rds_user: "root"
+rds_password: ""
+rds_database: "ecommerce"

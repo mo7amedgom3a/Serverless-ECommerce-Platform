@@ -1,0 +1,56 @@
+---
+# Playbook: Setup MySQL RDS Database
+# Description: Install MySQL client on EC2 and import SQL dump to RDS
+# Usage: ansible-playbook playbooks/setup_mysql_rds.yml --ask-vault-pass
+
+- name: Setup MySQL Client and Import Database to RDS
+  hosts: rds_admin_servers
+  gather_facts: yes
+  vars_files:
+    - ../vars/rds_credentials.yml
+
+  pre_tasks:
+    - name: Display playbook information
+      ansible.builtin.debug:
+        msg: |
+          ========================================
+          MySQL RDS Setup Playbook
+          ========================================
+          Target Host: {{ ansible_host }}
+          RDS Host: {{ rds_host }}
+          RDS Database: {{ rds_database }}
+          SQL Dump: {{ sql_dump_local_path }}
+          ========================================
+      run_once: true
+      delegate_to: localhost
+
+    - name: Verify required variables are set
+      ansible.builtin.assert:
+        that:
+          - ec2_public_ip is defined
+          - ec2_public_ip != "CHANGE_ME"
+          - rds_host is defined
+          - rds_password is defined
+          - rds_password != "CHANGE_ME_SECURE_PASSWORD"
+        fail_msg: "Required variables not set. Please configure inventory/group_vars/all.yml and vars/rds_credentials.yml"
+        success_msg: "All required variables are configured"
+      run_once: true
+
+  roles:
+    - role: ../roles/mysql_client
+      tags: ["mysql", "install"]
+
+    - role: ../roles/rds_import
+      tags: ["rds", "import"]
+
+  post_tasks:
+    - name: Playbook execution completed
+      ansible.builtin.debug:
+        msg: |
+          ========================================
+          Playbook Completed Successfully!
+          ========================================
+          MySQL client installed on: {{ ansible_host }}
+          Database imported to: {{ rds_host }}:{{ rds_port }}/{{ rds_database }}
+          ========================================
+      run_once: true

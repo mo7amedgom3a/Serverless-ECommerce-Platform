@@ -1,0 +1,6 @@
+---
+# Default variables for mysql_client role
+
+install_mysql_server: false
+mysql_repo_url: "https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm"
+mysql_gpg_key: "https://repo.mysql.com/RPM-GPG-KEY-mysql-2023"

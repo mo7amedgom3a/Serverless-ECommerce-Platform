@@ -1,0 +1,87 @@
+---
+# Tasks for copying SQL dump and importing to RDS
+
+- name: Check if local SQL dump file exists
+  ansible.builtin.stat:
+    path: "{{ sql_dump_local_path }}"
+  delegate_to: localhost
+  register: local_dump_file
+  become: no
+
+- name: Fail if SQL dump file not found locally
+  ansible.builtin.fail:
+    msg: "SQL dump file not found at {{ sql_dump_local_path }}"
+  when: not local_dump_file.stat.exists
+
+- name: Copy SQL dump file to remote server
+  ansible.builtin.copy:
+    src: "{{ sql_dump_local_path }}"
+    dest: "{{ sql_dump_remote_path }}"
+    mode: "0644"
+  register: dump_copy
+
+- name: Verify SQL dump file exists on remote server
+  ansible.builtin.stat:
+    path: "{{ sql_dump_remote_path }}"
+  register: remote_dump_file
+
+- name: Display dump file info
+  ansible.builtin.debug:
+    msg: "SQL dump file copied to {{ sql_dump_remote_path }} ({{ remote_dump_file.stat.size }} bytes)"
+  when: remote_dump_file.stat.exists
+
+- name: Test RDS connection
+  ansible.builtin.command: >
+    mysql 
+    -h {{ rds_host }} 
+    -P {{ rds_port }} 
+    -u {{ rds_user }} 
+    -p{{ rds_password }}
+    -e "SELECT 1"
+  environment:
+    MYSQL_PWD: "{{ rds_password }}"
+  register: rds_connection_test
+  changed_when: false
+  no_log: true # Don't log password
+
+- name: Import SQL dump to RDS
+  ansible.builtin.shell: >
+    mysql 
+    -h {{ rds_host }} 
+    -P {{ rds_port }} 
+    -u {{ rds_user }} 
+    {{ rds_database }} 
+    < {{ sql_dump_remote_path }}
+  environment:
+    MYSQL_PWD: "{{ rds_password }}"
+  register: import_result
+  no_log: true # Don't log password
+  when: remote_dump_file.stat.exists
+
+- name: Verify import by checking tables
+  ansible.builtin.command: >
+    mysql 
+    -h {{ rds_host }} 
+    -P {{ rds_port }} 
+    -u {{ rds_user }} 
+    {{ rds_database }}
+    -e "SHOW TABLES;"
+  environment:
+    MYSQL_PWD: "{{ rds_password }}"
+  register: tables_check
+  changed_when: false
+  no_log: true
+
+- name: Display imported tables
+  ansible.builtin.debug:
+    msg: "{{ tables_check.stdout_lines }}"
+
+- name: Clean up SQL dump file from remote server
+  ansible.builtin.file:
+    path: "{{ sql_dump_remote_path }}"
+    state: absent
+  when: cleanup_dump_after_import | bool
+
+- name: Import completed successfully
+  ansible.builtin.debug:
+    msg: "Database import completed successfully to {{ rds_host }}:{{ rds_port }}/{{ rds_database }}"

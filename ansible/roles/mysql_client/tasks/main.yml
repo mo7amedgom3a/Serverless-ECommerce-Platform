@@ -1,0 +1,50 @@
+---
+# Tasks for installing MySQL client on Amazon Linux
+
+- name: Download MySQL repository RPM
+  ansible.builtin.get_url:
+    url: "{{ mysql_repo_url }}"
+    dest: /tmp/mysql80-community-release.rpm
+    mode: "0644"
+  register: mysql_repo_download
+
+- name: Install MySQL repository
+  ansible.builtin.dnf:
+    name: /tmp/mysql80-community-release.rpm
+    state: present
+    disable_gpg_check: yes
+  when: mysql_repo_download is succeeded
+
+- name: Import MySQL GPG key
+  ansible.builtin.rpm_key:
+    key: "{{ mysql_gpg_key }}"
+    state: present
+
+- name: Install MySQL community client
+  ansible.builtin.dnf:
+    name: mysql-community-client
+    state: present
+    update_cache: yes
+
+- name: Install MySQL community server (optional)
+  ansible.builtin.dnf:
+    name: mysql-community-server
+    state: present
+  when: install_mysql_server | bool
+
+- name: Enable and start MySQL server
+  ansible.builtin.systemd:
+    name: mysqld
+    enabled: yes
+    state: started
+  when: install_mysql_server | bool
+  ignore_errors: yes
+
+- name: Verify MySQL client installation
+  ansible.builtin.command: mysql --version
+  register: mysql_version
+  changed_when: false
+
+- name: Display MySQL client version
+  ansible.builtin.debug:
+    msg: "MySQL client installed: {{ mysql_version.stdout }}"
