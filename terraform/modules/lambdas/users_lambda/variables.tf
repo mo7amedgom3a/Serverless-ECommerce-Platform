@@ -12,6 +12,7 @@ variable "environment" {
 variable "ecr_image_uri" {
   description = "URI of the Docker image in ECR"
   type        = string
+  
 }
 
 variable "private_subnet_ids" {

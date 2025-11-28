@@ -8,7 +8,7 @@ private_subnet_cidrs = ["10.0.3.0/24", "10.0.4.0/24"]
 availability_zones   = ["us-east-1a", "us-east-1b"]
 ec2_ami_id           = "ami-00ca32bbc84273381" # Amazon Linux 2 AMI (adjust as needed)
 ec2_instance_type    = "t2.micro"
-ec2_key_name         = "aws_my_key" # Replace with your EC2 key pair name
+ec2_key_name         = "my-aws-keys" # Replace with your EC2 key pair name
 
 # RDS Database
 db_username        = "admin"

@@ -50,7 +50,7 @@ variable "ec2_instance_type" {
 variable "ec2_key_name" {
   description = "Key pair name for the EC2 instance"
   type        = string
-  default     = "aws_my_key"
+  default     = "my-aws-keys"
 }
 
 # RDS Database variables
@@ -108,7 +108,7 @@ variable "create_rds_proxy" {
 variable "users_ecr_image_uri" {
   description = "URI of the Docker image in ECR for users service"
   type        = string
-  default     = "058264170818.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
+  default     = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
 }
 
 variable "lambda_timeout" {
