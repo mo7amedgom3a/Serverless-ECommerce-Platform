@@ -1,10 +1,10 @@
 provider "aws" {
-  region = var.aws_region
+  region = var.global.aws_region
 }
 
 # IAM Policy for Lambda to access Secrets Manager
 resource "aws_iam_policy" "secrets_manager_access" {
-  name        = "${var.environment}-secrets-manager-access-policy"
+  name        = "${var.global.environment}-secrets-manager-access-policy"
   description = "Policy for accessing Secrets Manager"
 
   policy = jsonencode({
@@ -22,14 +22,14 @@ resource "aws_iam_policy" "secrets_manager_access" {
   })
 
   tags = {
-    Name        = "${var.environment}-secrets-manager-access-policy"
-    Environment = var.environment
+    Name        = "${var.global.environment}-secrets-manager-access-policy"
+    Environment = var.global.environment
   }
 }
 
 # IAM Policy for Lambda to access RDS
 resource "aws_iam_policy" "rds_access" {
-  name        = "${var.environment}-rds-access-policy"
+  name        = "${var.global.environment}-rds-access-policy"
   description = "Policy for accessing RDS"
 
   policy = jsonencode({
@@ -46,14 +46,14 @@ resource "aws_iam_policy" "rds_access" {
   })
 
   tags = {
-    Name        = "${var.environment}-rds-access-policy"
-    Environment = var.environment
+    Name        = "${var.global.environment}-rds-access-policy"
+    Environment = var.global.environment
   }
 }
 
 # IAM Policy for Lambda VPC execution
 resource "aws_iam_policy" "lambda_vpc_execution" {
-  name        = "${var.environment}-lambda-vpc-execution-policy"
+  name        = "${var.global.environment}-lambda-vpc-execution-policy"
   description = "Policy for Lambda VPC execution"
 
   policy = jsonencode({
@@ -70,14 +70,14 @@ resource "aws_iam_policy" "lambda_vpc_execution" {
   })
 
   tags = {
-    Name        = "${var.environment}-lambda-vpc-execution-policy"
-    Environment = var.environment
+    Name        = "${var.global.environment}-lambda-vpc-execution-policy"
+    Environment = var.global.environment
   }
 }
 
 # IAM Policy for CloudWatch Logs
 resource "aws_iam_policy" "cloudwatch_logs" {
-  name        = "${var.environment}-cloudwatch-logs-policy"
+  name        = "${var.global.environment}-cloudwatch-logs-policy"
   description = "Policy for CloudWatch Logs"
 
   policy = jsonencode({
@@ -96,7 +96,7 @@ resource "aws_iam_policy" "cloudwatch_logs" {
   })
 
   tags = {
-    Name        = "${var.environment}-cloudwatch-logs-policy"
-    Environment = var.environment
+    Name        = "${var.global.environment}-cloudwatch-logs-policy"
+    Environment = var.global.environment
   }
 }

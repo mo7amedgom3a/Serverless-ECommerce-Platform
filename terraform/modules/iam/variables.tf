@@ -1,14 +1,13 @@
-variable "aws_region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
+# Global Configuration
+variable "global" {
+  description = "Global configuration settings"
+  type = object({
+    aws_region  = string
+    environment = string
+  })
 }
 
-variable "environment" {
-  description = "Environment name (e.g., dev, staging, prod)"
-  type        = string
-}
-
+# Module Dependencies
 variable "secrets_arns" {
   description = "ARNs of the Secrets Manager secrets"
   type        = list(string)

@@ -1,20 +1,24 @@
-variable "aws_region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
+# Global Configuration
+variable "global" {
+  description = "Global configuration settings"
+  type = object({
+    aws_region  = string
+    environment = string
+  })
 }
 
-variable "environment" {
-  description = "Environment name (e.g., dev, staging, prod)"
-  type        = string
+# Lambda Configuration
+variable "lambda_config" {
+  description = "Lambda function configuration"
+  type = object({
+    users_ecr_image_uri = string
+    timeout             = number
+    memory_size         = number
+    env_vars            = map(string)
+  })
 }
 
-variable "ecr_image_uri" {
-  description = "URI of the Docker image in ECR"
-  type        = string
-  
-}
-
+# Module Dependencies
 variable "private_subnet_ids" {
   description = "IDs of the private subnets for Lambda VPC configuration"
   type        = list(string)
@@ -23,24 +27,6 @@ variable "private_subnet_ids" {
 variable "lambda_sg_id" {
   description = "ID of the Lambda security group"
   type        = string
-}
-
-variable "lambda_timeout" {
-  description = "Timeout for the Lambda function in seconds"
-  type        = number
-  default     = 30
-}
-
-variable "lambda_memory_size" {
-  description = "Memory size for the Lambda function in MB"
-  type        = number
-  default     = 512
-}
-
-variable "environment_variables" {
-  description = "Environment variables for the Lambda function"
-  type        = map(string)
-  default     = {}
 }
 
 variable "secrets_manager_secret_id" {

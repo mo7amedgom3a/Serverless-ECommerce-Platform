@@ -13,6 +13,17 @@ output "private_subnet_ids" {
   value       = module.networking.private_subnet_ids
 }
 
+# EC2 outputs
+output "ec2_instance_id" {
+  description = "ID of the EC2 instance"
+  value       = module.ec2.ec2_instance_id
+}
+
+output "ec2_instance_public_ip" {
+  description = "Public IP of the EC2 instance"
+  value       = module.ec2.ec2_instance_public_ip
+}
+
 
 # RDS outputs
 output "rds_endpoint" {
@@ -28,16 +39,19 @@ output "rds_address" {
 output "rds_port" {
   description = "Port of the RDS instance"
   value       = module.rds.rds_port
+  sensitive   = true
 }
 
 output "rds_name" {
   description = "Database name"
   value       = module.rds.rds_name
+  sensitive   = true
 }
 
 output "rds_proxy_endpoint" {
   description = "Endpoint of the RDS Proxy"
   value       = module.rds.rds_proxy_endpoint
+  sensitive   = true
 }
 
 # Secrets Manager outputs

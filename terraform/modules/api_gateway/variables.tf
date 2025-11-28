@@ -1,20 +1,21 @@
-variable "aws_region" {
-  description = "AWS region to deploy resources"
-  type        = string
-  default     = "us-east-1"
+# Global Configuration
+variable "global" {
+  description = "Global configuration settings"
+  type = object({
+    aws_region  = string
+    environment = string
+  })
 }
 
-variable "environment" {
-  description = "Environment name (e.g., dev, staging, prod)"
-  type        = string
+# API Gateway Configuration
+variable "api_gateway_config" {
+  description = "API Gateway configuration"
+  type = object({
+    cors_allowed_origins = list(string)
+  })
 }
 
-variable "cors_allowed_origins" {
-  description = "List of allowed origins for CORS"
-  type        = list(string)
-  default     = ["*"]
-}
-
+# Module Dependencies
 variable "users_lambda_invoke_arn" {
   description = "Invoke ARN of the users Lambda function"
   type        = string

@@ -30,7 +30,7 @@ output "rds_arn" {
 
 output "rds_proxy_endpoint" {
   description = "Endpoint of the RDS Proxy"
-  value       = var.create_proxy ? aws_db_proxy.rds_proxy[0].endpoint : ""
+  value       = var.rds_config.create_proxy ? aws_db_proxy.rds_proxy[0].endpoint : ""
 }
 
 output "rds_password" {

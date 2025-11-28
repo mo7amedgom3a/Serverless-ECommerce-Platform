@@ -1,33 +1,33 @@
 provider "aws" {
-  region = var.aws_region
+  region = var.global.aws_region
 }
 
 # Random password for RDS if not provided
 resource "random_password" "rds_password" {
-  count   = var.db_password == "" ? 1 : 0
+  count   = var.rds_config.db_password == "" ? 1 : 0
   length  = 16
   special = false
 }
 
 locals {
-  db_password = var.db_password == "" ? random_password.rds_password[0].result : var.db_password
+  db_password = var.rds_config.db_password == "" ? random_password.rds_password[0].result : var.rds_config.db_password
 }
 
 # RDS Subnet Group
 resource "aws_db_subnet_group" "rds_subnet_group" {
-  name        = "${var.environment}-rds-subnet-group"
-  description = "RDS subnet group for ${var.environment}"
+  name        = "${var.global.environment}-rds-subnet-group"
+  description = "RDS subnet group for ${var.global.environment}"
   subnet_ids  = var.private_subnet_ids
 
   tags = {
-    Name        = "${var.environment}-rds-subnet-group"
-    Environment = var.environment
+    Name        = "${var.global.environment}-rds-subnet-group"
+    Environment = var.global.environment
   }
 }
 
 # RDS Parameter Group
 resource "aws_db_parameter_group" "rds_parameter_group" {
-  name   = "${var.environment}-rds-parameter-group"
+  name   = "${var.global.environment}-rds-parameter-group"
   family = "mysql8.0"
 
   parameter {
@@ -41,40 +41,40 @@ resource "aws_db_parameter_group" "rds_parameter_group" {
   }
 
   tags = {
-    Name        = "${var.environment}-rds-parameter-group"
-    Environment = var.environment
+    Name        = "${var.global.environment}-rds-parameter-group"
+    Environment = var.global.environment
   }
 }
 
 # RDS Instance
 resource "aws_db_instance" "rds_instance" {
-  identifier              = "${var.environment}-rds-instance"
-  allocated_storage       = var.allocated_storage
-  storage_type            = "gp2"
-  engine                  = "mysql"
-  engine_version          = "8.0"
-  instance_class          = var.instance_class
-  db_name                 = var.db_name
-  username                = var.db_username
-  password                = local.db_password
-  parameter_group_name    = aws_db_parameter_group.rds_parameter_group.name
-  db_subnet_group_name    = aws_db_subnet_group.rds_subnet_group.name
-  vpc_security_group_ids  = [var.rds_security_group_id]
-  publicly_accessible     = false
-  skip_final_snapshot     = true
-  multi_az                = var.multi_az
-  port                    = var.db_port
+  identifier             = "${var.global.environment}-rds-instance"
+  allocated_storage      = var.rds_config.allocated_storage
+  storage_type           = "gp2"
+  engine                 = "mysql"
+  engine_version         = "8.0"
+  instance_class         = var.rds_config.instance_class
+  db_name                = var.rds_config.db_name
+  username               = var.rds_config.db_username
+  password               = local.db_password
+  parameter_group_name   = aws_db_parameter_group.rds_parameter_group.name
+  db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
+  vpc_security_group_ids = [var.rds_security_group_id]
+  publicly_accessible    = false
+  skip_final_snapshot    = true
+  multi_az               = var.rds_config.multi_az
+  port                   = var.rds_config.db_port
 
   tags = {
-    Name        = "${var.environment}-rds-instance"
-    Environment = var.environment
+    Name        = "${var.global.environment}-rds-instance"
+    Environment = var.global.environment
   }
 }
 
 # RDS Proxy (Optional)
 resource "aws_db_proxy" "rds_proxy" {
-  count                  = var.create_proxy ? 1 : 0
-  name                   = "${var.environment}-rds-proxy"
+  count                  = var.rds_config.create_proxy ? 1 : 0
+  name                   = "${var.global.environment}-rds-proxy"
   debug_logging          = false
   engine_family          = "MYSQL"
   idle_client_timeout    = 1800
@@ -90,8 +90,8 @@ resource "aws_db_proxy" "rds_proxy" {
   }
 
   tags = {
-    Name        = "${var.environment}-rds-proxy"
-    Environment = var.environment
+    Name        = "${var.global.environment}-rds-proxy"
+    Environment = var.global.environment
   }
 
   depends_on = [aws_db_instance.rds_instance]
@@ -99,7 +99,7 @@ resource "aws_db_proxy" "rds_proxy" {
 
 # RDS Proxy Target Group
 resource "aws_db_proxy_default_target_group" "rds_proxy_target_group" {
-  count         = var.create_proxy ? 1 : 0
+  count         = var.rds_config.create_proxy ? 1 : 0
   db_proxy_name = aws_db_proxy.rds_proxy[0].name
 
   connection_pool_config {
@@ -111,7 +111,7 @@ resource "aws_db_proxy_default_target_group" "rds_proxy_target_group" {
 
 # RDS Proxy Target Registration
 resource "aws_db_proxy_target" "rds_proxy_target" {
-  count                  = var.create_proxy ? 1 : 0
+  count                  = var.rds_config.create_proxy ? 1 : 0
   db_instance_identifier = aws_db_instance.rds_instance.identifier
   db_proxy_name          = aws_db_proxy.rds_proxy[0].name
   target_group_name      = aws_db_proxy_default_target_group.rds_proxy_target_group[0].name
@@ -120,8 +120,8 @@ resource "aws_db_proxy_target" "rds_proxy_target" {
 
 # IAM Role for RDS Proxy
 resource "aws_iam_role" "rds_proxy_role" {
-  count = var.create_proxy ? 1 : 0
-  name  = "${var.environment}-rds-proxy-role"
+  count = var.rds_config.create_proxy ? 1 : 0
+  name  = "${var.global.environment}-rds-proxy-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -137,15 +137,15 @@ resource "aws_iam_role" "rds_proxy_role" {
   })
 
   tags = {
-    Name        = "${var.environment}-rds-proxy-role"
-    Environment = var.environment
+    Name        = "${var.global.environment}-rds-proxy-role"
+    Environment = var.global.environment
   }
 }
 
 # IAM Policy for RDS Proxy to access Secrets Manager
 resource "aws_iam_policy" "rds_proxy_policy" {
-  count       = var.create_proxy ? 1 : 0
-  name        = "${var.environment}-rds-proxy-policy"
+  count       = var.rds_config.create_proxy ? 1 : 0
+  name        = "${var.global.environment}-rds-proxy-policy"
   description = "Policy for RDS Proxy to access Secrets Manager"
 
   policy = jsonencode({
@@ -162,14 +162,14 @@ resource "aws_iam_policy" "rds_proxy_policy" {
   })
 
   tags = {
-    Name        = "${var.environment}-rds-proxy-policy"
-    Environment = var.environment
+    Name        = "${var.global.environment}-rds-proxy-policy"
+    Environment = var.global.environment
   }
 }
 
 # Attach Policy to Role
 resource "aws_iam_role_policy_attachment" "rds_proxy_policy_attachment" {
-  count      = var.create_proxy ? 1 : 0
+  count      = var.rds_config.create_proxy ? 1 : 0
   role       = aws_iam_role.rds_proxy_role[0].name
   policy_arn = aws_iam_policy.rds_proxy_policy[0].arn
 }

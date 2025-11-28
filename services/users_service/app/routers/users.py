@@ -10,7 +10,7 @@ from app.schemas.user import UserCreate, UserUpdate, UserResponse
 router = APIRouter(tags=["users"])
 
 
-@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
@@ -21,16 +21,19 @@ def create_user(
     return service.create_user(user_data)
 
 
-@router.get("/", response_model=List[UserResponse])
+@router.get("", response_model=List[UserResponse])
 def list_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
     """List all users"""
+    print("Listing users")
     repository = UserRepository(db)
     service = UserService(repository)
-    return service.list_users(skip, limit)
+    users = service.list_users(skip, limit)
+    print(f"users {users}")
+    return users
 
 
 @router.get("/{user_id}", response_model=UserResponse)
