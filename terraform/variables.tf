@@ -50,7 +50,7 @@ variable "ec2_instance_type" {
 variable "ec2_key_name" {
   description = "Key pair name for the EC2 instance"
   type        = string
-  default     = "aws_keys"
+  default     = "aws_my_key"
 }
 
 # RDS Database variables
@@ -128,6 +128,8 @@ variable "users_lambda_env_vars" {
   type        = map(string)
   default     = {
     LOG_LEVEL = "INFO"
+    ENVIRONMENT = "prod"
+    
   }
 }
 

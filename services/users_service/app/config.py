@@ -10,7 +10,7 @@ class Settings:
     """Application settings loaded from environment variables"""
     ENVIRONMENT: str = os.environ.get("ENVIRONMENT", "dev")
     LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
-    API_PREFIX: str = "/api/v1"
+    
 
     def __init__(self):
         if self.ENVIRONMENT == "dev":

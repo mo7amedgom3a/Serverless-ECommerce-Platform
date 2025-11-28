@@ -1,12 +1,12 @@
 import logging
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
 
 from app.config import settings
 from app.models.base import init_db
+from fastapi.responses import RedirectResponse
 
-from app.routers import users, health
-import json
+from app.routers import users
+
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL),
@@ -20,13 +20,6 @@ app = FastAPI(
     description="API for user management",
 )
 
-# Include routers
-app.include_router(health.router)
-app.include_router(users.router)
 
-# Root endpoint
-@app.get("/")
-def root():
-    """Redirect root to /users"""
-    return RedirectResponse(url="/users")
+app.include_router(users.router)
 

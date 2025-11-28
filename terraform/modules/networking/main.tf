@@ -55,7 +55,7 @@ data "aws_eip" "nat" {
 }
 # NAT Gateway
 resource "aws_nat_gateway" "nat_gw" {
-  allocation_id = "eipalloc-07e30e087ab001852"
+  allocation_id = "eipalloc-007ad83d8f3de853f"
   subnet_id     = aws_subnet.public[0].id
   
   tags = {

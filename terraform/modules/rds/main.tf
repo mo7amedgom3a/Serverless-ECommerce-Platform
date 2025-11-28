@@ -62,7 +62,6 @@ resource "aws_db_instance" "rds_instance" {
   vpc_security_group_ids  = [var.rds_security_group_id]
   publicly_accessible     = false
   skip_final_snapshot     = true
-  backup_retention_period = var.backup_retention_period
   multi_az                = var.multi_az
   port                    = var.db_port
 

@@ -24,3 +24,23 @@ variable "users_lambda_function_name" {
   description = "Name of the users Lambda function"
   type        = string
 }
+
+# variable "products_lambda_invoke_arn" {
+#   description = "Invoke ARN of the products Lambda function"
+#   type        = string
+# }
+
+# variable "products_lambda_function_name" {
+#   description = "Name of the products Lambda function"
+#   type        = string
+# }
+
+# variable "orders_lambda_invoke_arn" {
+#   description = "Invoke ARN of the orders Lambda function"
+#   type        = string
+# }
+
+# variable "orders_lambda_function_name" {
+#   description = "Name of the orders Lambda function"
+#   type        = string
+# }
