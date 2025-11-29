@@ -17,6 +17,7 @@ resource "aws_lambda_function" "users_lambda" {
 
   environment {
     variables = merge(var.lambda_config.env_vars, {
+      ENVIRONMENT = "prod"
       SECRETS_MANAGER_SECRET_ID = var.secrets_manager_secret_id
     })
   }
