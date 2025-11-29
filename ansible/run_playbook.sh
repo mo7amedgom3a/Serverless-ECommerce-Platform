@@ -39,6 +39,7 @@ fi
 # Ask if user wants to use vault
 echo -e "${YELLOW}Do you want to use Ansible Vault for credentials? (y/n)${NC}"
 read -r use_vault
+export ANSIBLE_CONFIG=/mnt/sda2/repos/Serverless-ECommerce-Platform/ansible/ansible.cfg
 
 if [ "$use_vault" = "y" ] || [ "$use_vault" = "Y" ]; then
     # Check if vault file is encrypted

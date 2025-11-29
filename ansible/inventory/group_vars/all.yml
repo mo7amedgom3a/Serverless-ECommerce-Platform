@@ -4,7 +4,7 @@
 # EC2 Connection Settings
 # Override these when running the playbook:
 # ansible-playbook playbooks/setup_mysql_rds.yml -e "ec2_public_ip=54.175.214.236"
-ec2_public_ip: "44.193.75.167"  # EC2 instance public IP
+ec2_public_ip: "44.201.63.199"  # EC2 instance public IP
 ssh_key_path: "~/my-aws-keys.pem"  # Path to SSH private key
 
 # MySQL Installation Settings

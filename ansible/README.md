@@ -272,6 +272,9 @@ sudo dnf remove mariadb-libs
 # Verify local file exists
 ls -la ../scripts/ecommerce_dump.sql
 
+# Set ansible config
+export ANSIBLE_CONFIG=/mnt/sda2/repos/Serverless-ECommerce-Platform/ansible/ansible.cfg
+
 # Check variable
 ansible-playbook playbooks/setup_mysql_rds.yml -e "sql_dump_local_path=/full/path/to/dump.sql"
 ```
