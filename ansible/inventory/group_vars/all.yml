@@ -4,8 +4,8 @@
 # EC2 Connection Settings
 # Override these when running the playbook:
 # ansible-playbook playbooks/setup_mysql_rds.yml -e "ec2_public_ip=54.175.214.236"
-ec2_public_ip: "CHANGE_ME"  # EC2 instance public IP
-ssh_key_path: "~/.ssh/aws_keys.pem"  # Path to SSH private key
+ec2_public_ip: "44.193.75.167"  # EC2 instance public IP
+ssh_key_path: "~/my-aws-keys.pem"  # Path to SSH private key
 
 # MySQL Installation Settings
 install_mysql_server: false  # Set to true to install MySQL server (not just client)
@@ -13,6 +13,6 @@ mysql_repo_url: "https://dev.mysql.com/get/mysql80-community-release-el9-1.noarc
 mysql_gpg_key: "https://repo.mysql.com/RPM-GPG-KEY-mysql-2023"
 
 # SQL Dump Settings
-sql_dump_local_path: "../scripts/ecommerce_dump.sql"  # Local path to SQL dump
+sql_dump_local_path: "/mnt/sda2/repos/Serverless-ECommerce-Platform/ansible/roles/rds_import/ecommerce_dump.sql"  # Local path to SQL dump
 sql_dump_remote_path: "/tmp/ecommerce_dump.sql"  # Remote path on EC2
 cleanup_dump_after_import: true  # Remove dump file after import

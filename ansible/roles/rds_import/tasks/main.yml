@@ -36,13 +36,16 @@
     -h {{ rds_host }} 
     -P {{ rds_port }} 
     -u {{ rds_user }} 
-    -p{{ rds_password }}
     -e "SELECT 1"
   environment:
     MYSQL_PWD: "{{ rds_password }}"
   register: rds_connection_test
   changed_when: false
-  no_log: true # Don't log password
+
+- name: Display connection test result
+  ansible.builtin.debug:
+    msg: "RDS connection successful"
+  when: rds_connection_test.rc == 0
 
 - name: Import SQL dump to RDS
   ansible.builtin.shell: >
@@ -55,7 +58,6 @@
   environment:
     MYSQL_PWD: "{{ rds_password }}"
   register: import_result
-  no_log: true # Don't log password
   when: remote_dump_file.stat.exists
 
 - name: Verify import by checking tables
@@ -70,7 +72,6 @@
     MYSQL_PWD: "{{ rds_password }}"
   register: tables_check
   changed_when: false
-  no_log: true
 
 - name: Display imported tables
   ansible.builtin.debug:

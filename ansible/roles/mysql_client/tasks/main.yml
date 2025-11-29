@@ -1,19 +1,17 @@
 ---
 # Tasks for installing MySQL client on Amazon Linux
 
-- name: Download MySQL repository RPM
-  ansible.builtin.get_url:
-    url: "{{ mysql_repo_url }}"
-    dest: /tmp/mysql80-community-release.rpm
-    mode: "0644"
+- name: Download MySQL repository RPM using wget
+  ansible.builtin.command:
+    cmd: wget https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm -O /tmp/mysql80-community-release-el9-1.noarch.rpm
+    creates: /tmp/mysql80-community-release-el9-1.noarch.rpm
   register: mysql_repo_download
 
-- name: Install MySQL repository
+- name: Install MySQL repository RPM
   ansible.builtin.dnf:
-    name: /tmp/mysql80-community-release.rpm
+    name: /tmp/mysql80-community-release-el9-1.noarch.rpm
     state: present
     disable_gpg_check: yes
-  when: mysql_repo_download is succeeded
 
 - name: Import MySQL GPG key
   ansible.builtin.rpm_key:
