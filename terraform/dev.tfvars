@@ -45,3 +45,9 @@ lambda_config = {
 api_gateway_config = {
   cors_allowed_origins = ["*"] # Replace with your allowed origins in production
 }
+
+# Notification Configuration
+notification_config = {
+  ses_sender_email             = "noreply@example.com" # Replace with your verified SES email
+  email_notifier_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-email-notifier:latest"
+}

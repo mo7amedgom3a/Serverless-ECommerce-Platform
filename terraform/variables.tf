@@ -99,3 +99,16 @@ variable "api_gateway_config" {
     cors_allowed_origins = ["*"]
   }
 }
+
+# Notification Configuration
+variable "notification_config" {
+  description = "Notification service configuration"
+  type = object({
+    ses_sender_email             = string
+    email_notifier_ecr_image_uri = string
+  })
+  default = {
+    ses_sender_email             = "noreply@example.com"
+    email_notifier_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-email-notifier:latest"
+  }
+}

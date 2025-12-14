@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
 from sqlalchemy.orm import Session
 from typing import List
 
 from app.models.base import get_db
 from app.repositories.order_repository import OrderRepository
 from app.services.order_service import OrderService
+from app.services.notification_service import NotificationService
 from app.schemas.order import OrderCreate, OrderUpdate, OrderResponse
 
 router = APIRouter(tags=["orders"])
@@ -13,12 +14,14 @@ router = APIRouter(tags=["orders"])
 @router.post("", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 def create_order(
     order_data: OrderCreate,
+    user_email: str = Body(..., embed=True),
     db: Session = Depends(get_db)
 ):
     """Create a new order"""
     repository = OrderRepository(db)
-    service = OrderService(repository)
-    return service.create_order(order_data)
+    notification_service = NotificationService()
+    service = OrderService(repository, notification_service)
+    return service.create_order(order_data, user_email)
 
 
 @router.get("", response_model=List[OrderResponse])
@@ -68,13 +71,15 @@ def get_order(
 def update_order(
     order_id: int,
     order_data: OrderUpdate,
+    user_email: str = Body(None, embed=True),
     db: Session = Depends(get_db)
 ):
     """Update an order"""
     repository = OrderRepository(db)
-    service = OrderService(repository)
+    notification_service = NotificationService()
+    service = OrderService(repository, notification_service)
     
-    updated_order = service.update_order(order_id, order_data)
+    updated_order = service.update_order(order_id, order_data, user_email)
     if not updated_order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

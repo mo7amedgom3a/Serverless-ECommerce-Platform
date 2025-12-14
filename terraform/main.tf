@@ -102,3 +102,42 @@ module "api_gateway" {
   users_lambda_invoke_arn    = module.users_lambda.lambda_function_invoke_arn
   users_lambda_function_name = module.users_lambda.lambda_function_name
 }
+
+# SNS and SQS for Order Notifications
+module "sns_sqs" {
+  source = "./modules/sns_sqs"
+
+  global = var.global
+}
+
+# Update IAM with SNS/SQS/SES policies
+module "iam_notifications" {
+  source = "./modules/iam"
+
+  global            = var.global
+  secrets_arns      = [module.secrets_manager.secret_arn]
+  rds_resource_arns = [module.rds.rds_arn]
+  sns_topic_arns    = [module.sns_sqs.sns_topic_arn]
+  sqs_queue_arns    = [module.sns_sqs.sqs_queue_arn]
+  enable_ses_policy = true
+}
+
+# Email Notifier Lambda
+module "email_notifier" {
+  source = "./modules/lambdas/email_notifier"
+
+  global = var.global
+  lambda_config = {
+    email_notifier_ecr_image_uri = var.notification_config.email_notifier_ecr_image_uri
+    timeout                      = 60
+    memory_size                  = 256
+    env_vars = {
+      LOG_LEVEL = "INFO"
+    }
+  }
+  notification_config       = var.notification_config
+  sqs_queue_arn             = module.sns_sqs.sqs_queue_arn
+  sqs_consume_policy_arn    = module.iam_notifications.sqs_consume_policy_arn
+  ses_send_email_policy_arn = module.iam_notifications.ses_send_email_policy_arn
+  cloudwatch_policy_arn     = module.iam_notifications.cloudwatch_logs_policy_arn
+}

@@ -67,6 +67,20 @@ class Settings:
         except Exception as e:
             logger.error(f"Error loading production environment variables: {e}")
             raise
+    
+    def load_notification_config(self):
+        """Load notification configuration"""
+        self.SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN", "")
+        self.AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
+        
+    def __init__(self):
+        if self.ENVIRONMENT == "dev":
+            self.load_local_env_variables()
+        else:
+            self.load_prod_env_variables()
+        
+        # Load notification config for all environments
+        self.load_notification_config()
         
     @property
     def database_url(self) -> str:

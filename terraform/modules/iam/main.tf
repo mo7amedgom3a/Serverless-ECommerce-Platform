@@ -100,3 +100,82 @@ resource "aws_iam_policy" "cloudwatch_logs" {
     Environment = var.global.environment
   }
 }
+
+# IAM Policy for SNS Publish
+resource "aws_iam_policy" "sns_publish" {
+  count       = length(var.sns_topic_arns) > 0 ? 1 : 0
+  name        = "${var.global.environment}-sns-publish-policy"
+  description = "Policy for publishing to SNS topics"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sns:Publish"
+        ]
+        Effect   = "Allow"
+        Resource = var.sns_topic_arns
+      }
+    ]
+  })
+
+  tags = {
+    Name        = "${var.global.environment}-sns-publish-policy"
+    Environment = var.global.environment
+  }
+}
+
+# IAM Policy for SQS Consume
+resource "aws_iam_policy" "sqs_consume" {
+  count       = length(var.sqs_queue_arns) > 0 ? 1 : 0
+  name        = "${var.global.environment}-sqs-consume-policy"
+  description = "Policy for consuming from SQS queues"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes",
+          "sqs:ChangeMessageVisibility"
+        ]
+        Effect   = "Allow"
+        Resource = var.sqs_queue_arns
+      }
+    ]
+  })
+
+  tags = {
+    Name        = "${var.global.environment}-sqs-consume-policy"
+    Environment = var.global.environment
+  }
+}
+
+# IAM Policy for SES Send Email
+resource "aws_iam_policy" "ses_send_email" {
+  count       = var.enable_ses_policy ? 1 : 0
+  name        = "${var.global.environment}-ses-send-email-policy"
+  description = "Policy for sending emails via SES"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = {
+    Name        = "${var.global.environment}-ses-send-email-policy"
+    Environment = var.global.environment
+  }
+}

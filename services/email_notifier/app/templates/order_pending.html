@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Pending</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #FF9800;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 5px 5px;
+        }
+        .order-details {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .total {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #FF9800;
+            text-align: right;
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⏳ Order Pending Payment</h1>
+    </div>
+    <div class="content">
+        <h2>Hello!</h2>
+        <p>Your order is currently pending payment confirmation.</p>
+        
+        <div class="order-details">
+            <h3>Order #{{ order_id }}</h3>
+            <p><strong>Status:</strong> {{ status }}</p>
+            <p><strong>Order Date:</strong> {{ created_at }}</p>
+            
+            <div class="total">
+                Total Amount: ${{ order_total }}
+            </div>
+        </div>
+        
+        <p>Please complete your payment to proceed with your order.</p>
+    </div>
+    
+    <div class="footer">
+        <p>Thank you for shopping with us!</p>
+    </div>
+</body>
+</html>
