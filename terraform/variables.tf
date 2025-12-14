@@ -73,18 +73,21 @@ variable "rds_config" {
 variable "lambda_config" {
   description = "Lambda function configuration"
   type = object({
-    users_ecr_image_uri = string
-    timeout             = number
-    memory_size         = number
-    env_vars            = map(string)
+    users_ecr_image_uri    = string
+    products_ecr_image_uri = string
+    orders_ecr_image_uri   = string
+    timeout                = number
+    memory_size            = number
+    env_vars               = map(string)
   })
   default = {
-    users_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
-    timeout             = 30
-    memory_size         = 512
+    users_ecr_image_uri    = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
+    products_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-products:latest"
+    orders_ecr_image_uri   = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-orders:latest"
+    timeout                = 30
+    memory_size            = 512
     env_vars = {
-      LOG_LEVEL   = "INFO"
-      ENVIRONMENT = "prod"
+      LOG_LEVEL = "INFO"
     }
   }
 }

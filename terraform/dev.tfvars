@@ -33,9 +33,11 @@ rds_config = {
 
 # Lambda Configuration
 lambda_config = {
-  users_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
-  timeout             = 30
-  memory_size         = 512
+  users_ecr_image_uri    = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
+  products_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-products:latest"
+  orders_ecr_image_uri   = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-orders:latest"
+  timeout                = 30
+  memory_size            = 512
   env_vars = {
     LOG_LEVEL = "INFO"
   }

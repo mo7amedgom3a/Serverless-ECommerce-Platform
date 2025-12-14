@@ -78,29 +78,65 @@ module "iam" {
   rds_resource_arns = [module.rds.rds_arn]
 }
 
-# Lambda Function for Users Service
+# Users Lambda
 module "users_lambda" {
   source = "./modules/lambdas/users_lambda"
 
   global                     = var.global
   lambda_config              = var.lambda_config
   private_subnet_ids         = module.networking.private_subnet_ids
-  lambda_sg_id               = module.networking.lambda_rds_sg_id
-  secrets_manager_secret_id  = module.secrets_manager.secret_name
+  lambda_sg_id               = module.networking.lambda_sg_id
+  secrets_manager_secret_id  = module.secrets_manager.secret_id
   secrets_manager_policy_arn = module.iam.secrets_manager_policy_arn
   rds_policy_arn             = module.iam.rds_access_policy_arn
   vpc_policy_arn             = module.iam.lambda_vpc_execution_policy_arn
   cloudwatch_policy_arn      = module.iam.cloudwatch_logs_policy_arn
 }
 
+# Products Lambda
+module "products_lambda" {
+  source = "./modules/lambdas/products_lambda"
+
+  global                     = var.global
+  lambda_config              = var.lambda_config
+  private_subnet_ids         = module.networking.private_subnet_ids
+  lambda_sg_id               = module.networking.lambda_sg_id
+  secrets_manager_secret_id  = module.secrets_manager.secret_id
+  secrets_manager_policy_arn = module.iam.secrets_manager_policy_arn
+  rds_policy_arn             = module.iam.rds_access_policy_arn
+  vpc_policy_arn             = module.iam.lambda_vpc_execution_policy_arn
+  cloudwatch_policy_arn      = module.iam.cloudwatch_logs_policy_arn
+}
+
+# Orders Lambda
+module "orders_lambda" {
+  source = "./modules/lambdas/orders_lambda"
+
+  global                     = var.global
+  lambda_config              = var.lambda_config
+  private_subnet_ids         = module.networking.private_subnet_ids
+  lambda_sg_id               = module.networking.lambda_sg_id
+  secrets_manager_secret_id  = module.secrets_manager.secret_id
+  secrets_manager_policy_arn = module.iam.secrets_manager_policy_arn
+  rds_policy_arn             = module.iam.rds_access_policy_arn
+  vpc_policy_arn             = module.iam.lambda_vpc_execution_policy_arn
+  cloudwatch_policy_arn      = module.iam.cloudwatch_logs_policy_arn
+  sns_topic_arn              = module.sns_sqs.sns_topic_arn
+  sns_publish_policy_arn     = module.iam_notifications.sns_publish_policy_arn
+}
+
 # API Gateway
 module "api_gateway" {
   source = "./modules/api_gateway"
 
-  global                     = var.global
-  api_gateway_config         = var.api_gateway_config
-  users_lambda_invoke_arn    = module.users_lambda.lambda_function_invoke_arn
-  users_lambda_function_name = module.users_lambda.lambda_function_name
+  global                        = var.global
+  api_gateway_config            = var.api_gateway_config
+  users_lambda_invoke_arn       = module.users_lambda.lambda_function_invoke_arn
+  users_lambda_function_name    = module.users_lambda.lambda_function_name
+  products_lambda_invoke_arn    = module.products_lambda.lambda_function_invoke_arn
+  products_lambda_function_name = module.products_lambda.lambda_function_name
+  orders_lambda_invoke_arn      = module.orders_lambda.lambda_function_invoke_arn
+  orders_lambda_function_name   = module.orders_lambda.lambda_function_name
 }
 
 # SNS and SQS for Order Notifications
