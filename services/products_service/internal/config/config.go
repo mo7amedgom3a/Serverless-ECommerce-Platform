@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -13,14 +14,17 @@ import (
 
 // Config holds application configuration
 type Config struct {
-	Environment string
-	LogLevel    string
-	DBHost      string
-	DBPort      string
-	DBName      string
-	DBUser      string
-	DBPassword  string
-	AWSRegion   string
+	Environment   string
+	LogLevel      string
+	DBHost        string
+	DBPort        string
+	DBName        string
+	DBUser        string
+	DBPassword    string
+	AWSRegion     string
+	RedisEndpoint string
+	RedisPort     string
+	CacheTTL      time.Duration
 }
 
 // DBSecret represents the structure of database credentials in Secrets Manager
@@ -35,9 +39,12 @@ type DBSecret struct {
 // LoadConfig loads configuration from environment variables
 func LoadConfig() (*Config, error) {
 	config := &Config{
-		Environment: getEnv("ENVIRONMENT", "dev"),
-		LogLevel:    getEnv("LOG_LEVEL", "INFO"),
-		AWSRegion:   getEnv("AWS_REGION", "us-east-1"),
+		Environment:   getEnv("ENVIRONMENT", "dev"),
+		LogLevel:      getEnv("LOG_LEVEL", "INFO"),
+		AWSRegion:     getEnv("AWS_REGION", "us-east-1"),
+		RedisEndpoint: getEnv("REDIS_ENDPOINT", ""),
+		RedisPort:     getEnv("REDIS_PORT", "6379"),
+		CacheTTL:      5 * time.Minute, // Default 5 minutes
 	}
 
 	if config.Environment == "dev" {

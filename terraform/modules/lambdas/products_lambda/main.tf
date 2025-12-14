@@ -19,6 +19,8 @@ resource "aws_lambda_function" "products_lambda" {
     variables = merge(var.lambda_config.env_vars, {
       ENVIRONMENT               = var.global.environment
       SECRETS_MANAGER_SECRET_ID = var.secrets_manager_secret_id
+      REDIS_ENDPOINT            = var.redis_endpoint
+      REDIS_PORT                = tostring(var.redis_port)
     })
   }
 

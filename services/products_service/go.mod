@@ -9,4 +9,5 @@ require (
 	github.com/aws/aws-lambda-go v1.41.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.0
 	github.com/aws/aws-sdk-go v1.48.0
+	github.com/redis/go-redis/v9 v9.3.0
 )

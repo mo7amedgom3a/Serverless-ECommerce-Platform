@@ -43,6 +43,14 @@ lambda_config = {
   }
 }
 
+# Redis Configuration
+redis_config = {
+  node_type        = "cache.t3.micro"
+  num_cache_nodes  = 1
+  engine_version   = "7.0"
+  parameter_family = "redis7"
+}
+
 # API Gateway Configuration
 api_gateway_config = {
   cors_allowed_origins = ["*"] # Replace with your allowed origins in production

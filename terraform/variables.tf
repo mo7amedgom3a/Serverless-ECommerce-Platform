@@ -92,6 +92,23 @@ variable "lambda_config" {
   }
 }
 
+# Redis Configuration
+variable "redis_config" {
+  description = "Redis cluster configuration"
+  type = object({
+    node_type        = string
+    num_cache_nodes  = number
+    engine_version   = string
+    parameter_family = string
+  })
+  default = {
+    node_type        = "cache.t3.micro"
+    num_cache_nodes  = 1
+    engine_version   = "7.0"
+    parameter_family = "redis7"
+  }
+}
+
 # API Gateway Configuration
 variable "api_gateway_config" {
   description = "API Gateway configuration"

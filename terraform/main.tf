@@ -78,6 +78,17 @@ module "iam" {
   rds_resource_arns = [module.rds.rds_arn]
 }
 
+# ElastiCache Redis for Caching
+module "elasticache" {
+  source = "./modules/elasticache"
+
+  global             = var.global
+  redis_config       = var.redis_config
+  vpc_id             = module.networking.vpc_id
+  private_subnet_ids = module.networking.private_subnet_ids
+  lambda_sg_id       = module.networking.lambda_sg_id
+}
+
 # Users Lambda
 module "users_lambda" {
   source = "./modules/lambdas/users_lambda"
@@ -106,6 +117,8 @@ module "products_lambda" {
   rds_policy_arn             = module.iam.rds_access_policy_arn
   vpc_policy_arn             = module.iam.lambda_vpc_execution_policy_arn
   cloudwatch_policy_arn      = module.iam.cloudwatch_logs_policy_arn
+  redis_endpoint             = module.elasticache.primary_endpoint
+  redis_port                 = module.elasticache.port
 }
 
 # Orders Lambda
