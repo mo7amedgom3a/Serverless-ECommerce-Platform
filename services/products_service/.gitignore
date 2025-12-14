@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+*.so
+.env
+venv/
+env/
+*.log
+.DS_Store
+
+# Go specific
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+go.sum
