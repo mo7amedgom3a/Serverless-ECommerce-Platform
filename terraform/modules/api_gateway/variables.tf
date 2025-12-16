@@ -45,3 +45,13 @@ variable "orders_lambda_function_name" {
   description = "Name of the orders Lambda function"
   type        = string
 }
+
+variable "cart_lambda_invoke_arn" {
+  description = "Invoke ARN of the cart Lambda function"
+  type        = string
+}
+
+variable "cart_lambda_function_name" {
+  description = "Name of the cart Lambda function"
+  type        = string
+}

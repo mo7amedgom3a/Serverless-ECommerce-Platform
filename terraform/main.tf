@@ -150,6 +150,8 @@ module "api_gateway" {
   products_lambda_function_name = module.products_lambda.lambda_function_name
   orders_lambda_invoke_arn      = module.orders_lambda.lambda_function_invoke_arn
   orders_lambda_function_name   = module.orders_lambda.lambda_function_name
+  cart_lambda_invoke_arn        = module.cart_lambda.lambda_function_invoke_arn
+  cart_lambda_function_name     = module.cart_lambda.lambda_function_name
 }
 
 # SNS and SQS for Order Notifications

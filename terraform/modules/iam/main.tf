@@ -179,3 +179,37 @@ resource "aws_iam_policy" "ses_send_email" {
     Environment = var.global.environment
   }
 }
+
+# DynamoDB Access Policy
+resource "aws_iam_policy" "dynamodb_access" {
+  count = var.dynamodb_table_arn != "" ? 1 : 0
+  name  = "${var.global.environment}-dynamodb-access-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:BatchGetItem"
+        ]
+        Resource = [
+          var.dynamodb_table_arn,
+          "${var.dynamodb_table_arn}/index/*"
+        ]
+      }
+    ]
+  })
+
+  tags = {
+    Name        = "${var.global.environment}-dynamodb-access-policy"
+    Environment = var.global.environment
+  }
+}

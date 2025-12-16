@@ -36,6 +36,7 @@ lambda_config = {
   users_ecr_image_uri    = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
   products_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-products:latest"
   orders_ecr_image_uri   = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-orders:latest"
+  cart_ecr_image_uri     = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-cart:latest"
   timeout                = 30
   memory_size            = 512
   env_vars = {

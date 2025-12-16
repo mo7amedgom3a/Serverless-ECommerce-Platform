@@ -30,5 +30,10 @@ output "sqs_consume_policy_arn" {
 
 output "ses_send_email_policy_arn" {
   description = "ARN of the SES send email policy"
-  value       = length(aws_iam_policy.ses_send_email) > 0 ? aws_iam_policy.ses_send_email[0].arn : null
+  value       = var.enable_ses_policy ? aws_iam_policy.ses_send_email[0].arn : ""
+}
+
+output "dynamodb_access_policy_arn" {
+  description = "ARN of the DynamoDB access policy"
+  value       = var.dynamodb_table_arn != "" ? aws_iam_policy.dynamodb_access[0].arn : ""
 }

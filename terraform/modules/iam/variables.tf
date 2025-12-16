@@ -36,3 +36,9 @@ variable "enable_ses_policy" {
   type        = bool
   default     = false
 }
+
+variable "dynamodb_table_arn" {
+  description = "ARN of DynamoDB table for cart service"
+  type        = string
+  default     = ""
+}
