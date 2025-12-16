@@ -69,13 +69,22 @@ resource "aws_secretsmanager_secret_version" "rds_credentials_update" {
   })
 }
 
+# DynamoDB for Cart Service
+module "dynamodb" {
+  source = "./modules/dynamodb"
+
+  global     = var.global
+  table_name = "${var.global.environment}-carts"
+}
+
 # IAM Policies
 module "iam" {
   source = "./modules/iam"
 
-  global            = var.global
-  secrets_arns      = [module.secrets_manager.secret_arn]
-  rds_resource_arns = [module.rds.rds_arn]
+  global             = var.global
+  secrets_arns       = [module.secrets_manager.secret_arn]
+  rds_resource_arns  = [module.rds.rds_arn]
+  dynamodb_table_arn = module.dynamodb.table_arn
 }
 
 # ElastiCache Redis for Caching
@@ -136,6 +145,17 @@ module "orders_lambda" {
   cloudwatch_policy_arn      = module.iam.cloudwatch_logs_policy_arn
   sns_topic_arn              = module.sns_sqs.sns_topic_arn
   sns_publish_policy_arn     = module.iam_notifications.sns_publish_policy_arn
+}
+
+# Cart Lambda
+module "cart_lambda" {
+  source = "./modules/lambdas/cart_lambda"
+
+  global                = var.global
+  lambda_config         = var.lambda_config
+  dynamodb_table_name   = module.dynamodb.table_name
+  dynamodb_policy_arn   = module.iam.dynamodb_access_policy_arn
+  cloudwatch_policy_arn = module.iam.cloudwatch_logs_policy_arn
 }
 
 # API Gateway
