@@ -1,0 +1,55 @@
+{
+  "StartAt": "WaitForPaymentProcessing",
+  "States": {
+    "WaitForPaymentProcessing": {
+      "Type": "Wait",
+      "Seconds": 3,
+      "Next": "ProcessPayment"
+    },
+    "ProcessPayment": {
+      "Type": "Task",
+      "Resource": "${payment_lambda_arn}",
+      "Next": "PaymentDecision"
+    },
+    "PaymentDecision": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.paymentStatus",
+          "StringEquals": "SUCCESS",
+          "Next": "CheckInventory"
+        }
+      ],
+      "Default": "PaymentFailed"
+    },
+    "PaymentFailed": {
+      "Type": "Fail",
+      "Cause": "Payment failed"
+    },
+    "CheckInventory": {
+      "Type": "Task",
+      "Resource": "${inventory_lambda_arn}",
+      "Next": "InventoryDecision"
+    },
+    "InventoryDecision": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.inStock",
+          "BooleanEquals": true,
+          "Next": "CreateShipment"
+        }
+      ],
+      "Default": "OutOfStock"
+    },
+    "OutOfStock": {
+      "Type": "Fail",
+      "Cause": "Item out of stock"
+    },
+    "CreateShipment": {
+      "Type": "Task",
+      "Resource": "${shipment_lambda_arn}",
+      "End": true
+    }
+  }
+}

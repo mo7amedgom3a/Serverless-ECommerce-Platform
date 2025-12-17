@@ -88,7 +88,7 @@ resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 
   triggers = {
-    redeployment = sha1(jsonencode([
+    redeployment = sha1(jsonencode(concat([
       aws_api_gateway_rest_api.api.id,
       aws_api_gateway_integration.users_root_integration,
       aws_api_gateway_integration.users_proxy_integration,
@@ -98,7 +98,12 @@ resource "aws_api_gateway_deployment" "deployment" {
       #aws_api_gateway_integration.products_options,
       #aws_api_gateway_integration.orders_any_integration,
       #aws_api_gateway_integration.orders_options,
-    ]))
+      ],
+      var.step_functions_state_machine_arn != "" ? [
+        aws_api_gateway_integration.workflow_start_integration[0],
+        aws_api_gateway_integration.workflow_start_options_integration[0]
+      ] : []
+    )))
   }
 
   lifecycle {

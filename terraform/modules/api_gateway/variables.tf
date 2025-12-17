@@ -55,3 +55,10 @@ variable "cart_lambda_function_name" {
   description = "Name of the cart Lambda function"
   type        = string
 }
+
+variable "step_functions_state_machine_arn" {
+  description = "ARN of the Step Functions state machine for workflow orchestration"
+  type        = string
+  default     = ""
+}
+

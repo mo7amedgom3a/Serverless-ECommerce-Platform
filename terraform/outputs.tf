@@ -91,3 +91,21 @@ output "secrets_manager_secret_name" {
 #   description = "URL for the users API"
 #   value       = "${module.api_gateway.invoke_url}/users"
 # }
+
+# Step Functions outputs
+output "step_functions_state_machine_arn" {
+  description = "ARN of the Step Functions state machine"
+  value       = module.step_functions.state_machine_arn
+}
+
+output "step_functions_state_machine_name" {
+  description = "Name of the Step Functions state machine"
+  value       = module.step_functions.state_machine_name
+}
+
+output "workflow_api_url" {
+  description = "URL to start workflow execution via API Gateway"
+  value       = "${module.api_gateway.invoke_url}/workflow/start"
+}
+
+

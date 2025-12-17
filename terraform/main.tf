@@ -162,16 +162,17 @@ module "cart_lambda" {
 module "api_gateway" {
   source = "./modules/api_gateway"
 
-  global                        = var.global
-  api_gateway_config            = var.api_gateway_config
-  users_lambda_invoke_arn       = module.users_lambda.lambda_function_invoke_arn
-  users_lambda_function_name    = module.users_lambda.lambda_function_name
-  products_lambda_invoke_arn    = module.products_lambda.lambda_function_invoke_arn
-  products_lambda_function_name = module.products_lambda.lambda_function_name
-  orders_lambda_invoke_arn      = module.orders_lambda.lambda_function_invoke_arn
-  orders_lambda_function_name   = module.orders_lambda.lambda_function_name
-  cart_lambda_invoke_arn        = module.cart_lambda.lambda_function_invoke_arn
-  cart_lambda_function_name     = module.cart_lambda.lambda_function_name
+  global                           = var.global
+  api_gateway_config               = var.api_gateway_config
+  users_lambda_invoke_arn          = module.users_lambda.lambda_function_invoke_arn
+  users_lambda_function_name       = module.users_lambda.lambda_function_name
+  products_lambda_invoke_arn       = module.products_lambda.lambda_function_invoke_arn
+  products_lambda_function_name    = module.products_lambda.lambda_function_name
+  orders_lambda_invoke_arn         = module.orders_lambda.lambda_function_invoke_arn
+  orders_lambda_function_name      = module.orders_lambda.lambda_function_name
+  cart_lambda_invoke_arn           = module.cart_lambda.lambda_function_invoke_arn
+  cart_lambda_function_name        = module.cart_lambda.lambda_function_name
+  step_functions_state_machine_arn = module.step_functions.state_machine_arn
 }
 
 # SNS and SQS for Order Notifications
@@ -212,3 +213,41 @@ module "email_notifier" {
   ses_send_email_policy_arn = module.iam_notifications.ses_send_email_policy_arn
   cloudwatch_policy_arn     = module.iam_notifications.cloudwatch_logs_policy_arn
 }
+
+# Payment Lambda for Step Functions
+module "payment_lambda" {
+  source = "./modules/lambdas/payment_lambda"
+
+  global                = var.global
+  lambda_config         = var.lambda_config
+  cloudwatch_policy_arn = module.iam.cloudwatch_logs_policy_arn
+}
+
+# Inventory Lambda for Step Functions
+module "inventory_lambda" {
+  source = "./modules/lambdas/inventory_lambda"
+
+  global                = var.global
+  lambda_config         = var.lambda_config
+  cloudwatch_policy_arn = module.iam.cloudwatch_logs_policy_arn
+}
+
+# Shipment Lambda for Step Functions
+module "shipment_lambda" {
+  source = "./modules/lambdas/shipment_lambda"
+
+  global                = var.global
+  lambda_config         = var.lambda_config
+  cloudwatch_policy_arn = module.iam.cloudwatch_logs_policy_arn
+}
+
+# Step Functions for Order Workflow Orchestration
+module "step_functions" {
+  source = "./modules/step_functions"
+
+  global               = var.global
+  payment_lambda_arn   = module.payment_lambda.lambda_function_arn
+  inventory_lambda_arn = module.inventory_lambda.lambda_function_arn
+  shipment_lambda_arn  = module.shipment_lambda.lambda_function_arn
+}
+

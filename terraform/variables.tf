@@ -73,21 +73,27 @@ variable "rds_config" {
 variable "lambda_config" {
   description = "Lambda function configuration"
   type = object({
-    users_ecr_image_uri    = string
-    products_ecr_image_uri = string
-    orders_ecr_image_uri   = string
-    cart_ecr_image_uri     = string
-    timeout                = number
-    memory_size            = number
-    env_vars               = map(string)
+    users_ecr_image_uri     = string
+    products_ecr_image_uri  = string
+    orders_ecr_image_uri    = string
+    cart_ecr_image_uri      = string
+    payment_ecr_image_uri   = string
+    inventory_ecr_image_uri = string
+    shipment_ecr_image_uri  = string
+    timeout                 = number
+    memory_size             = number
+    env_vars                = map(string)
   })
   default = {
-    users_ecr_image_uri    = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
-    products_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-products:latest"
-    orders_ecr_image_uri   = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-orders:latest"
-    cart_ecr_image_uri     = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-cart:latest"
-    timeout                = 30
-    memory_size            = 512
+    users_ecr_image_uri     = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-users:latest"
+    products_ecr_image_uri  = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-products:latest"
+    orders_ecr_image_uri    = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-orders:latest"
+    cart_ecr_image_uri      = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-cart:latest"
+    payment_ecr_image_uri   = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-payment:latest"
+    inventory_ecr_image_uri = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-inventory:latest"
+    shipment_ecr_image_uri  = "016829298884.dkr.ecr.us-east-1.amazonaws.com/serverless-ecommerce-dev-shipment:latest"
+    timeout                 = 30
+    memory_size             = 512
     env_vars = {
       LOG_LEVEL = "INFO"
     }
